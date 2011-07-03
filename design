@@ -1,0 +1,24 @@
+== Tile properties ==
+	Sprite
+
+== Tile functionalities ==
+x	Ground		- Non-Collideable
+x	Wall		- Collideable, indestructible
+	Ice		- Non-Collideable, low-friction
+x	Soft wall	- Collideable, destructible
+	Lava		- Non-Collideable, harmful
+x	Slowsand	- Non-Collideable, reduced speed
+x	Quicksand	- Non-Collideable, increased speed
+	Water		- Non-Collideable, reduces speed drastically, reduces armor.
+x	Left/right/up/down - Non-Collideable, pushes tank in a direction
+	RotateLeft/RotateRight - Rotates the tank in a direction for a specified amount
+	Explosive	- Collideable, explodes when shot at
+	Switch		- Non-Collideable, inverts collision state of all neighboring doors
+	Door		- (Non-)Collideable, switched based on neighboring switch.
+	
+	
+
+Mine		- Non-Collideable, explodes when moved on.
+Portal		- Moves the tank to a random other portal
+Jump		- Jumps the tank to a random other position, causes minor damage.
+

@@ -1,0 +1,19 @@
+Tile:
+	tankhit(tile,tank)
+	shothit(tile,shot) -- Returns true if
+	colfunc(tile,tank) [Redundant?]
+
+World:
+	checkCollision(self, pos)
+
+Shot:
+	checkTileCollision(self)
+	handleTileCollision(self,tile) --> ... [Should go to tile.shothit(tile,self)]
+	
+	() --> Tile.shothit(tile, self)
+
+ShotSystem:
+	() --> Shot()
+
+PlayerTank:
+	--> World.checkCollision(pos) -> ... [Should go to tile.tankhit(tile,self]

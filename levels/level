@@ -1,0 +1,10 @@
+random
+---
+0	gfx/grass.png		0	nothing		nothing		nothing		0.85
+1	gfx/stone.png		1	nothing		shotBreakableWall		nothing		0.1
+2	gfx/obsidian.png	1	nothing		shotBreakableObsidian		nothing		0.05
+3	gfx/sand.png		0	slowsand	nothing		nothing		0.2
+4	gfx/up.png		0	uptile		rotup		nothing		0.05
+5	gfx/down.png		0	downtile	rotdown		nothing		0.05
+6	gfx/left.png		0	lefttile	rotleft		nothing		0.05
+7	gfx/right.png		0	righttile	rotright	nothing		0.05

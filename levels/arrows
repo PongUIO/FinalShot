@@ -1,0 +1,6 @@
+random
+---
+0	gfx/up.png		0	uptile		rotup		nothing		1
+1	gfx/down.png		0	downtile	rotdown		nothing		1
+2	gfx/left.png		0	lefttile	rotleft		nothing		1
+3	gfx/right.png		0	righttile	rotright	nothing		1
