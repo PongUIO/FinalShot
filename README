@@ -1,0 +1,82 @@
+Instructions:
+P1:
+Movement: arrows
+Fire: rctrl (right)
+Change weapons: rshift
+
+P2:
+Movement: wasd
+Fire: r
+Change weapons: t
+
+Restart: o
+
+Stats:
+Tank-HP: 100
+Regeneration starts after 3 secs, 6 HP/s - damage cancels.
+Grey bricks: 50
+Black bricks: 200
+
+Velocity is given in pixels/s
+Weapons:
+Cannon
+Projectile: a simple cannon-ball
+Autofire: yes
+Reload-time: 1/6 s
+Damage: 10
+Velocity: 8
+Purpose: block-destruction, high DPS-CQ weapon
+
+Rocket
+Projectile: a fast rocket
+Autofire: no
+Reload-time: 1 s
+Damage: 40
+Velocity: 6
+Purpose: surprise-attacks, fast attacks while fleeing from an opponent
+
+Napalm-Rocket
+Projectile: a slow rocket which explodes into 35 bits of napalm (hit wall or lifetime expiration) or 5 bits of napalm (player-hit)
+Autofire: no
+Reload-time: 2 s
+Damage: 15
+Lifetime: 1.5 s
+Velocity: 3
+Purpose: flush-out and area of denial.
+
+Napalm:
+Note: self-fire
+Projectile: orange splash
+Autofire: N/A
+Reload-time: N/A
+Damage: 8
+Velocity: 1.066-2.66
+Lifetime: 3.33-8.33 s
+
+Flamethrower:
+Projectile: 3x napalm
+Autofire: yes
+Reload-time: 1/10 s
+Damage: 3x1
+Lifetime: 5-6.66 s
+Damage: 1
+Velocity: 0.64-1.60
+Purpose: suppression, denial of HP-regen
+
+FinalShot
+Projectile: small, fast projectile leaving a cyan trail
+Autofire: no
+Reload-time: 2 s
+Damage 70
+Velocity: 16 (vrooooom)
+Purpose: Long-distance attacks, finish-off.
+
+Coming soon:
+Menus!
+New weapons!
+New tiles!
+New graphics!
+Cleaner code!
+Better collision!
+(Maybe) AI
+(Maybe) network-play
