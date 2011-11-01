@@ -1,3 +1,8 @@
+Dependencies:
+ttf-bitstream-vera
+python-pygame
+python-numpy
+
 Instructions:
 P1:
 Movement: arrows
