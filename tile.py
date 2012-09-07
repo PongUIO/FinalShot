@@ -231,10 +231,12 @@ class World:
 		pass
 	
 	def getTile(self,pos):
-		if pos[0] < 0 or pos[1] < 0 or pos[0] >= self.screen_width or pos[1] >= self.screen_height:
+		xPos = int(pos[0]/32)
+		yPos = int(pos[1]/32)
+		if pos[0] < 0 or pos[1] < 0 or xPos >= self.screen_width/32 or yPos >= self.screen_height/32:
 			return None
 		else:
-			return self.tiles[int(pos[1])/32][int(pos[0])/32]
+			return self.tiles[yPos][xPos]
 	
 	def process(self):
 		pass

@@ -12,8 +12,8 @@ from tile import *
 from particle import *
 from menu import *
 
-screen_width = 1024
-screen_height = 768
+screen_width = 639
+screen_height = 500
 
 
 class Shot:
