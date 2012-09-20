@@ -12,8 +12,8 @@ from tile import *
 from particle import *
 from menu import *
 
-screen_width = 639
-screen_height = 500
+screen_width = 1280
+screen_height = 800
 
 
 class Shot:
@@ -21,8 +21,10 @@ class Shot:
 		self.pos = numpy.array(pos)
 		self.vel = numpy.array(direction*speed)
 		self.pid = player.playernumber
+		self.colPos = numpy.array([0,0])
 		self.damage = 0
 		self.rotate = False
+		self.direction = None
 	
 	def __call__(self):
 		return False # Kill dummy shots instantaneously
@@ -37,8 +39,11 @@ class Shot:
 		pass
 	def rotateshot(self, direction):
 		if self.rotate:
-			speed = numpy.sqrt(sum(self.vel**2))
-			self.vel += [0.1*speed*numpy.cos(direction), -0.1*speed*numpy.sin(direction)]
+			speed = 0.1*max(numpy.sqrt(sum(self.vel**2)), 5)
+			mod = [speed*numpy.cos(direction), -speed*numpy.sin(direction)]
+			self.vel += mod
+			if (self.direction != None):
+				self.direction += mod
 
 			#self.vel += [self.step*0.3*speed*numpy.cos(temp), self.step*0.3*speed*numpy.sin(temp)]
 			#print self.vel
@@ -49,20 +54,24 @@ class StraightShot(Shot):
 		self.size = self.sprite.get_size()
 		Shot.__init__(self, pos, direction, 8, player)
 		self.damage = 6
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 	
 	def __call__(self):
 		self.pos[0] += self.vel[0]
 		self.pos[1] += self.vel[1]
-		temp = self.pos + numpy.array([4,4])
+		temp = self.pos + self.colPos
 		if temp[0] < 0 or temp[1] < 0 or temp[0] >= screen_width or temp[1] >= screen_height:
 			return True
 		tile = world.getTile(temp)
-		if (tile.coldetect):
+		if (tile and tile.coldetect):
 			tile.shothit(self, tile)
 			self.playerHitTrigger(35)
 			return True
-		else:
+		elif (tile):
 			tile.shothit(self, tile)
+		elif (tile == None):
+			return True
+
 		return False
 	
 	def draw(self, screen):
@@ -83,6 +92,7 @@ class RocketShot(StraightShot):
 			angle += numpy.pi*2
 		self.sprite = pygame.transform.rotate(self.spritenr, (angle/numpy.pi)*180)
 		self.size = self.sprite.get_size()
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 	def draw(self, screen):
 		for i in range(3):
 			self.player.world.ps.create(Smoke(self.world, self.pos, -0.5*self.vel+random.randint(-4,5,2), 30))
@@ -110,6 +120,7 @@ class NapalmRocketShot(RocketShot):
 			angle += numpy.pi*2
 		self.sprite = pygame.transform.rotate(self.spritenr, (angle/numpy.pi)*180)
 		self.size = self.sprite.get_size()
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 	def __call__(self):
 		self.life -= 1
 		if self.life < 0:
@@ -119,18 +130,20 @@ class NapalmRocketShot(RocketShot):
 			return RocketShot.__call__(self)
 	def playerHitTrigger(self, i):
 		for i in range(i):
-			self.world.shots.create(Napalm(self.pos-self.vel*2, random.randint(-2,3,2), self.player))
+			self.world.shots.create(Napalm(self.pos-self.vel*2, (random.random(2)-0.5)*4, self.player))
 
 class Napalm(StraightShot):
 	sprite = pygame.image.load("gfx/napalm.png")
 	def __init__(self, pos, direction, player):
 		Shot.__init__(self, pos, direction, 1, player)
+		self.rotate = True
 		self.size = self.sprite.get_size()
 		self.direction = direction
 		self.world = player.world
 		self.damage = 8
 		self.life = random.randint(200,500)
 		self.pid = 2 #FRIENDLY FIRE!
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 	def __call__(self):
 		self.vel = numpy.array(self.direction*(self.life*4/750.))
 		self.life -= 1
@@ -141,9 +154,11 @@ class Napalm(StraightShot):
 class FlamethrowerShot(Napalm):
 	def __init__(self, pos, direction, player):
 		Napalm.__init__(self, pos, direction*5, player)
+		self.rotate = True
 		self.pid = player.playernumber
 		self.life = random.randint(300,400)
 		self.damage = 1
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 
 class Flamethrower(Shot):
 	def __init__(self, pos, direction, player):
@@ -151,7 +166,7 @@ class Flamethrower(Shot):
 		self.pos = player.pos
 		self.direction = direction
 	def __call__(self):
-		for i in [-0.05*numpy.pi, 0, 0.05*numpy.pi]:
+		for i in (numpy.random.random(4)-0.5)*0.1*numpy.pi:
 			angle = numpy.arctan2(self.direction[1], self.direction[0]) + i
 			temp = numpy.array([numpy.cos(angle), numpy.sin(angle)])
 			self.player.world.shots.create(FlamethrowerShot(self.pos+numpy.array([12,12]), temp*0.6, self.player))
@@ -166,6 +181,7 @@ class SniperShot(StraightShot):
 		self.vel *= 2
 		self.player = player
 		self.startpos = pos
+		self.colPos = numpy.array(self.sprite.get_rect()[2:4])/2
 	def draw(self, screen):
 		StraightShot.draw(self, screen)
 		length = int(sum(numpy.sqrt(self.vel**2))) + 1
@@ -193,15 +209,14 @@ class ShotSystem:
 		eraseList = []
 		for shot in self.shotPack:
 			for tank in self.tanks:
-				if shot.pid != tank.playernumber:
-					if tank.collides(shot):
-						tank.life -= shot.damage
-						tank.regen = tank.startregen
-						tank.showaura = False
-						shot.playerHitTrigger(5)
-						eraseList.append(shot)
-						hit[numpy.random.randint(0,len(hit))].play()
-						break
+				if shot.pid != tank.playernumber and tank.collides(shot):
+					tank.life -= shot.damage
+					tank.regen = tank.startregen
+					tank.showaura = False
+					shot.playerHitTrigger(5)
+					eraseList.append(shot)
+					hit[numpy.random.randint(0,len(hit))].play()
+					break
 		self.removeShots(eraseList)
 	def clean(self):
 		self.shotPack = []
@@ -225,7 +240,7 @@ tank2 = pygame.image.load("gfx/tank2.png")
 shots = ShotSystem(ps)
 world = World(ps, shots)
 weps = [StraightShot, RocketShot, NapalmRocketShot, Flamethrower, SniperShot]
-icons = ["gfx/cannonicon.png", "gfx/rocketicon.png", "gfx/rocketnapalmicon.png", "gfx/napalm.png", "gfx/snipershoticon.png"]
+icons = ["gfx/cannonicon.png", "gfx/rocketicon.png", "gfx/rocketnapalmicon.png", "gfx/napalmicon.png", "gfx/snipershoticon.png"]
 loadtimes = [10, 60, 120, 6, 150]
 regen = 10
 startregen = 180
@@ -238,13 +253,13 @@ font = pygame.font.SysFont("Bitstream Vera Sans Mono", 24)
 fgcolor = (0,0,0)
 kd = ["Kills: ", "Deaths:"]
 
-def play(screen, level):
+def play(screen, level, report):
 	gspeed = 60
 	stats = [[0,0],[0,0]]
 	world.load(level, screen_width, screen_height)
 	background = surface_init()
 	ctime = time.time()
-	ptime = ctime
+	repLTime = ptime = ctime
 	labels = []
 	showscores = False
 	ratio = 0.5
@@ -260,10 +275,15 @@ def play(screen, level):
 	background = surface_init()
 	shots.clean()
 	ps.clean()
+	if report:
+		print "start 100"
 	while True:
 		event = pygame.event.wait()
 		ctime = time.time()
 		dtime = ctime - ptime
+		if report and (ctime - repLTime) > 1:
+			repLTime = ctime
+			print "time_request 1"
 		for i in xrange(int(dtime*gspeed)):
 			ptank1()
 			ptank2()
@@ -281,12 +301,12 @@ def play(screen, level):
 				for i in xrange(2):
 					for j in xrange(3):
 						screen.blit(labels[i][j], (100+i*((screen_width-200)/2), 100+j*24))
-
 			pygame.display.flip()
 			pygame.event.clear(pygame.VIDEOEXPOSE)
 
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
+				print "exit 0" #+ str(stats[1][1]) + ", " + str(stats[0][1])
 				return 0
 			elif event.key == pygame.K_o:
 				if ptank2.life <= 0:
@@ -335,18 +355,35 @@ def surface_init():
 	world.draw(mysurf)
 	return mysurf
 
-def main():
+def main(mode, report, fullscreen):
+	if report:
+		print "initializing"
+	if mode == 2:
+		level = "levels/level"
 	framerate = 60
 	pygame.time.set_timer(pygame.VIDEOEXPOSE, 1000 / framerate)
 	screen = pygame.display.set_mode((screen_width, screen_height))
-	mode = 0
-	#pygame.display.toggle_fullscreen()
+	if fullscreen:
+		pygame.display.toggle_fullscreen()
 	while mode != -1:
 		if mode == 0:
 			mode, level = menu(screen)
 		elif mode == 1:
-			mode = play(screen, level)
+			mode = play(screen, level, report)
+		elif mode == 2:
+			play(screen, level, report)
+			return
 
 
 if __name__ == "__main__":
-	main()
+	mode = 0
+	report = False
+	fullscreen = False
+	for arg in sys.argv:
+		if (arg == "play"):
+			mode = 2
+		elif (arg == "report"):
+			report = True
+		elif (arg == "fullscreen"):
+			fullscreen = True
+	main(mode, report, fullscreen)
