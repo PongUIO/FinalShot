@@ -306,7 +306,8 @@ def play(screen, level, report):
 
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
-				print "exit 0" #+ str(stats[1][1]) + ", " + str(stats[0][1])
+				if report:
+					print "exit 0"
 				return 0
 			elif event.key == pygame.K_o:
 				if ptank2.life <= 0:
